@@ -1,0 +1,115 @@
+FINAL PROJECT DEVELOPING DATA PRODUCTS
+========================================================
+author: MIGUEL ANGEL COHUO AVILA
+date: 20 NOV 2020
+autosize: true
+
+LEARNING SHINY
+========================================================
+
+view apps  <https://macohuo.shinyapps.io/aprendiendo/>.
+
+- INSTRUCCIONES
+- USING ui.R
+- USING server.R
+Slide Instruction
+===============================================================
+- this basic application generates a map with leaflet using shiny reactive
+-basic instructions
+- 1.-Generate a cvs file with two columns lng and lat in the first row
+- 2.-In the second row put the values you want
+- 3.-Load the data and press the button to see the result
+- 4.-You can view the data in a table
+
+========================================================
+Slide Continue
+- if you prefer, enter the values yourself such as longitude, latitude and the label and press view
+
+USING ui.R EXAMPLE
+========================================================
+
+
+```r
+library(shiny)
+library(leaflet)
+library(webshot)
+ui <- fluidPage(
+  #TITLE PLANEL
+    titlePanel("generating marks on maps using leaflet"),
+    #Sidebar panel
+    sidebarLayout(
+        sidebarPanel(
+            
+            p(" generating marks with file csv"),
+            #using control widgets
+            fileInput(inputId = "datos", label = "Cargue los datos", multiple = FALSE, placeholder = "archivo no seleccionado o error de formato", accept = "csv"),
+            #
+            actionButton(inputId = "marcas", label = "dibujar todas"),
+        ),
+        #main principal..
+        mainPanel(
+            h3("Result"),
+            leafletOutput("mymap"),
+            tableOutput(outputId = "table"),
+            )
+    )
+)
+```
+
+USING server.R
+========================================================
+
+
+```r
+library(shiny)
+library(leaflet)
+library(webshot)
+server <- function(input, output, session) {
+        contentsrea <- reactive({
+          #input$datos
+            inFile <- input$datos
+        if (is.null(inFile))
+            return(NULL)
+        read.csv(inFile$datapath)
+    })
+    
+    observeEvent(input$marcas,{
+        
+        if(!is.null(input$datos)){
+            df<- read.csv(input$datos$datapath, header=TRUE,sep=",")
+            #Reactive expressions
+            output$mymap <- renderLeaflet({
+                df %>%
+                    leaflet()%>%
+                    addTiles() %>%
+                    addMarkers()
+            })
+            
+        }
+    })
+    
+    observeEvent(input$dib,{
+        longitud <- as.numeric(input$lg)
+        latitud <- as.numeric(input$la)
+        output$mymap <- renderLeaflet({
+        leaflet() %>%
+            addTiles() %>%
+            setView(lng =longitud, lat = latitud, zoom = 7) %>%
+            addMarkers(lng = longitud, lat = latitud, popup = input$popup)
+ 
+        })
+                  })
+    
+    observeEvent(input$ver,{
+     if(!is.null(input$datos)){
+         df<- read.csv(input$datos$datapath, header=TRUE,sep=",")
+         output$table <- renderTable(df, rownames = TRUE)
+         
+     }
+        
+           
+    })
+    
+   
+}
+```
