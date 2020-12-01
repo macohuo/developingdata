@@ -32,6 +32,23 @@ server <- function(input, output, session) {
         }
     })
     
+    observeEvent(input$aleatorio,{
+     
+        dfa <- data.frame(lng = runif(input$marks, min=-92.000 , max=-87.000 ),
+                         lat = runif(input$marks, min=19.000, max=21.000)
+                         )
+        output$mymap <-renderLeaflet({
+           dfa %>% 
+            leaflet() %>%
+            addTiles() %>%
+            addMarkers()
+            
+            
+            #output$table <- renderTable(dfa, rownames = TRUE)   
+        })
+           
+    })
+    
     observeEvent(input$dib,{
         longitud <- as.numeric(input$lg)
         latitud <- as.numeric(input$la)
@@ -43,6 +60,10 @@ server <- function(input, output, session) {
  
         })
                   })
+    
+    #observeEvent(input$veraleatorios,{
+     #   output$table <- renderTable(input$b, rownames = TRUE)
+     #})
     
     observeEvent(input$ver,{
      if(!is.null(input$datos)){
